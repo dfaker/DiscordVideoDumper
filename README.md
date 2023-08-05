@@ -29,3 +29,4 @@ Will enforce a minimum of 5 seconds between posts.
 - `y` Send Drag/Drop
 - `u` next Video
 - `i` previous Video
+- `Mousewheel` to skip between clips
