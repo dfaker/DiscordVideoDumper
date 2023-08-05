@@ -3,6 +3,8 @@ Guided selection and automated "drag and drop" posting of discord videos - quick
 
 ![image](https://github.com/dfaker/DiscordVideoDumper/assets/35278260/744dce47-1918-4b5f-b8e6-7b57b49c8acd)
 
+**Download a windows release: https://github.com/dfaker/DiscordVideoDumper/releases**
+
 Click the top `Video Path` button to select a folder to scan.
 Click `Scan Path` to scan that folder and all subfolders for .mp4 files.
 
