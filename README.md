@@ -9,6 +9,7 @@ Click `Scan Path` to scan that folder and all subfolders for .mp4 files.
 All found fines are saved in a cache, click `Reset Cache` to clear it.
 Click `Slideshow` to skip to next video as soon as the current one ends without pressing any of the shortcuts.
 
+Requires libmpv https://mpv.io/ - or download a bundled release: https://github.com/dfaker/DiscordVideoDumper/releases
 
 To use: 
 - click the video window.
