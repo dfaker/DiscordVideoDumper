@@ -10,7 +10,12 @@ All found fines are saved in a cache, click `Reset Cache` to clear it.
 Click `Slideshow` to skip to next video as soon as the current one ends without pressing any of the shortcuts.
 
 
-To use, click the video window, and hover you mouse over the discord window, pressing `y` will drag the current clip to discoed and post it.
+To use: 
+- click the video window.
+- hover your mouse over the discord window.
+- pressing `y` will drag the current clip to the current mouse position and 'insta upload' it.
+
+Will enforce a minimum of 5 seconds between posts.
 
 # Other Keyboard Shortcuts
 
