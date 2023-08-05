@@ -1,5 +1,5 @@
 # DiscordVideoDumper
-Guided selection and automated "drag and drop" posting of discord videos
+Guided selection and automated "drag and drop" posting of discord videos - quick and dirty tool for posters.
 
 ![image](https://github.com/dfaker/DiscordVideoDumper/assets/35278260/744dce47-1918-4b5f-b8e6-7b57b49c8acd)
 
