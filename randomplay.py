@@ -51,18 +51,24 @@ except Exception as e:
 random.shuffle(vfiles)
 files = vfiles[::]
 
-
-
 root.columnconfigure(0, weight=1)
 root.columnconfigure(1, weight=0)
 root.rowconfigure(0, weight=0)
 root.rowconfigure(1, weight=1)
 root.geometry("800x600")
 
-entry = Entry(root)
+entry = Entry(root,text='')
 entry.grid(column=0,row=1,sticky='NESW')
 
 buttonscanPath = Button(root,text=f'Scan Path = \'{scanpath}\'')
+
+
+frame = Frame(root,width=500,height=500,background='#3d3d3d')
+frame.grid(column=0,row=2,columnspan=4,sticky='NESW')
+
+def resetfiles():
+    global vfiles
+    vfiles.clear()
 
 def setScanPath():
     global scanpath
@@ -75,23 +81,24 @@ def setScanPath():
 
 buttonscanPath.configure(command=setScanPath)
 
-buttonscanPath.grid(column=0,row=0,columnspan=3,sticky='NESW')
+buttonscanPath.grid(column=0,row=0,columnspan=4,sticky='NESW')
 
-buttonRescan = Button(root,text='rescan',command=scanfiles)
+buttonRescan = Button(root,text='Scan Path',command=scanfiles)
 buttonRescan.grid(column=1,row=1,sticky='NESW')
 
-buttonRescan = Button(root,text='slideshow',command= lambda:slideshow())
+buttonRescan = Button(root,text='Reset Cache',command=resetfiles)
 buttonRescan.grid(column=2,row=1,sticky='NESW')
 
-frame = Frame(root,width=500,height=500,background='#3d3d3d')
-frame.grid(column=0,row=2,columnspan=3,sticky='NESW')
+buttonRescan = Button(root,text='Slideshow',command= lambda:slideshow())
+buttonRescan.grid(column=3,row=1,sticky='NESW')
+
 
 instructionsLabel = Label(root,text='Click on this window, and hover the mouse over the discord window, then press the key shortcut controls.')
-instructionsLabel.grid(column=0,row=3,columnspan=3,sticky='NESW')
+instructionsLabel.grid(column=0,row=4,columnspan=3,sticky='NESW')
 
 
 controlsLabel = Label(root,text='Shortcuts: q=Quit d=Delete Video m=Mute, y=Send Drag/Drop, u=nextVid, i=prevVid')
-controlsLabel.grid(column=0,row=4,columnspan=3,sticky='NESW')
+controlsLabel.grid(column=0,row=5,columnspan=4,sticky='NESW')
 
 
 doSlideshow=False
