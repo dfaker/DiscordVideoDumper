@@ -17,6 +17,7 @@ To use:
 - click the video window.
 - hover your mouse over the discord window.
 - pressing `y` will drag the current clip to the current mouse position and 'insta upload' it.
+- Add search terms in the input box to the left of `Scan Path` to filter videos by filename.
 
 Will enforce a minimum of 5 seconds between posts.
 
