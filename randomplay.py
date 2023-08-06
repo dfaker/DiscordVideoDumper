@@ -10,7 +10,7 @@ import mpv
 import time 
 from tkinterdnd2 import Tk as TkinterDnDTk
 from tkinterdnd2 import DND_FILES,DND_TEXT,CF_UNICODETEXT,CF_TEXT,COPY,MOVE,LINK,CF_HDROP,FileGroupDescriptor
-from tkinter import Entry,Frame,Button, Label, filedialog
+from tkinter import Entry,Frame,Button, Label, filedialog, Checkbutton, IntVar
 from threading import Timer 
 import json
 import time
@@ -20,8 +20,19 @@ t = None
 
 root = TkinterDnDTk()
 
-
 scanpath = os.path.abspath('.')
+
+
+varmp4 = IntVar(root)
+varmp4.set(1)
+varmov = IntVar(root)
+varmov.set(1)
+vargif = IntVar(root)
+vargif.set(1)
+varjpg = IntVar(root)
+varjpg.set(1)
+varpng = IntVar(root)
+varpng.set(1)
 
 def scanfiles():
   global vfiles
@@ -29,7 +40,15 @@ def scanfiles():
     print(r)
     for f in fl:
       p = os.path.join(r,f)
-      if p.endswith('.mp4') and p not in vfiles:
+      if p.upper().endswith('.MP4') and varmp4.get()==1 and p not in vfiles:
+        vfiles.append(p)
+      if p.upper().endswith('.MOV') and varmov.get()==1 and p not in vfiles:
+        vfiles.append(p)
+      if p.upper().endswith('.GIF') and vargif.get()==1 and p not in vfiles:
+        vfiles.append(p)
+      if (p.upper().endswith('.JPG') or p.upper().endswith('.JPEG')) and varjpg.get()==1 and p not in vfiles:
+        vfiles.append(p)
+      if p.upper().endswith('.PNG') and varpng.get()==1 and p not in vfiles:
         vfiles.append(p)
   open('filecache.bin','w').write(json.dumps(vfiles))
   random.shuffle(vfiles)
@@ -52,25 +71,27 @@ random.shuffle(vfiles)
 files = vfiles[::]
 
 root.columnconfigure(0, weight=1)
-root.columnconfigure(1, weight=1)
+root.columnconfigure(1, weight=0)
+root.columnconfigure(1, weight=0)
 root.rowconfigure(0, weight=0)
 root.rowconfigure(1, weight=0)
-root.rowconfigure(2, weight=1)
+root.rowconfigure(2, weight=0)
+root.rowconfigure(3, weight=1)
 
 root.geometry("800x600")
 
-entry = Entry(root,text='')
-entry.grid(column=0,row=1,sticky='NESW')
-
 buttonscanPath = Button(root,text=f'Scan Path = \'{scanpath}\'')
 
-
 frame = Frame(root,width=500,height=500,background='#3d3d3d')
-frame.grid(column=0,row=2,columnspan=4,sticky='NESW')
+frame.grid(column=0,row=3,columnspan=4,sticky='NESW')
+
+player = mpv.MPV(wid=frame.winfo_id())
 
 def resetfiles():
     global vfiles
+    player.stop()
     vfiles.clear()
+    open('filecache.bin','w').write(json.dumps(vfiles))
 
 def setScanPath():
     global scanpath
@@ -82,17 +103,57 @@ def setScanPath():
             buttonscanPath.configure(text=f'Video Path = \'{scanpath}\'')
 
 buttonscanPath.configure(command=setScanPath)
-
 buttonscanPath.grid(column=0,row=0,columnspan=4,sticky='NESW')
 
+
+framefiletypes = Frame(root,background='red')
+framefiletypes.columnconfigure(0, weight=1)
+framefiletypes.columnconfigure(1, weight=1)
+framefiletypes.columnconfigure(2, weight=1)
+framefiletypes.columnconfigure(3, weight=1)
+framefiletypes.columnconfigure(4, weight=1)
+
+framefiletypes.grid(column=0,row=1,columnspan=4,sticky='NESW')
+
+
+buttonmp4 = Checkbutton(framefiletypes,text='mp4',variable=varmp4)
+buttonmp4.grid(column=0,row=0,sticky='NESW')
+buttonmp4.select()
+
+buttonmov = Checkbutton(framefiletypes,text='mov',variable=varmov)
+buttonmov.grid(column=1,row=0,sticky='NESW')
+buttonmov.select()
+
+
+buttongif = Checkbutton(framefiletypes,text='gif',variable=vargif)
+buttongif.grid(column=2,row=0,sticky='NESW')
+buttongif.select()
+
+
+buttonjpg = Checkbutton(framefiletypes,text='jpg',variable=varjpg)
+buttonjpg.grid(column=3,row=0,sticky='NESW')
+buttonjpg.select()
+
+
+buttonpng = Checkbutton(framefiletypes,text='png',variable=varpng)
+buttonpng.grid(column=4,row=0,sticky='NESW')
+buttonpng.select()
+
+
+entry = Entry(root,text='')
+entry.grid(column=0,row=2,sticky='NESW')
+
+
 buttonRescan = Button(root,text='Scan Path',command=scanfiles)
-buttonRescan.grid(column=1,row=1,sticky='NESW')
+buttonRescan.grid(column=1,row=2,sticky='NESW')
 
 buttonRescan = Button(root,text='Reset Cache',command=resetfiles)
-buttonRescan.grid(column=2,row=1,sticky='NESW')
+buttonRescan.grid(column=2,row=2,sticky='NESW')
 
 buttonRescan = Button(root,text='Slideshow',command= lambda:slideshow())
-buttonRescan.grid(column=3,row=1,sticky='NESW')
+buttonRescan.grid(column=3,row=2,sticky='NESW')
+
+
 
 
 instructionsLabel = Label(root,text='Click on this window, and hover the mouse over the discord window, then press the key shortcut controls.')
@@ -105,7 +166,6 @@ controlsLabel.grid(column=0,row=5,columnspan=4,sticky='NESW')
 
 doSlideshow=False
 
-player = mpv.MPV(wid=frame.winfo_id())
 player.mute=True
 currentFile = None
 player.loop='inf'
