@@ -52,9 +52,11 @@ random.shuffle(vfiles)
 files = vfiles[::]
 
 root.columnconfigure(0, weight=1)
-root.columnconfigure(1, weight=0)
+root.columnconfigure(1, weight=1)
 root.rowconfigure(0, weight=0)
-root.rowconfigure(1, weight=1)
+root.rowconfigure(1, weight=0)
+root.rowconfigure(2, weight=1)
+
 root.geometry("800x600")
 
 entry = Entry(root,text='')
