@@ -230,15 +230,16 @@ def queuesendfile(e):
     if diff<6:
       timeout=6-diff
 
-
-
   dt = Timer(timeout, sendfile)
   dt.start()
 
+def quit(e):
+    root.destroy()
+    exit()
 
 root.bind('<Double-Button-1>',nextvid)
 root.bind('<MouseWheel>',nextvid)
-frame.bind('<q>', lambda x:exit())
+frame.bind('<q>', quit)
 frame.bind('<d>', delvid)
 frame.bind('<m>', toggleMute)
 frame.bind('<Button-1>',lambda x:frame.focus())
@@ -251,9 +252,6 @@ frame.bind('<i>',lambda x:nextvid(-1))
 frame.bind('<I>',lambda x:nextvid(-1))
 entry.bind('<Return>',nextvid)
 
-
-
-
 def dragInit(e):
   fbin = '{{{}}}'.format(os.path.abspath(currentFile))
   nextvid(e)
@@ -261,5 +259,10 @@ def dragInit(e):
 
 frame.drag_source_register("*")
 frame.dnd_bind('<<DragInitCmd>>',dragInit)
+
+try:
+    nextvid(None)
+except Exception as e:
+    print(e)
 
 root.mainloop()
