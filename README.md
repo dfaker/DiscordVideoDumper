@@ -1,7 +1,7 @@
 # DiscordVideoDumper
 Guided selection and automated "drag and drop" posting of discord videos - quick and dirty tool for posters.
 
-![image](https://github.com/dfaker/DiscordVideoDumper/assets/35278260/744dce47-1918-4b5f-b8e6-7b57b49c8acd)
+![image](https://github.com/dfaker/DiscordVideoDumper/assets/35278260/1ae89657-bcd4-47f2-9c1c-623f9ec3c296)
 
 **Download a windows release: https://github.com/dfaker/DiscordVideoDumper/releases**
 
