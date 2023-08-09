@@ -1,7 +1,7 @@
 # DiscordVideoDumper
 Guided selection and automated "drag and drop" posting of discord videos - quick and dirty tool for posters.
 
-![image](https://github.com/dfaker/DiscordVideoDumper/assets/35278260/1ae89657-bcd4-47f2-9c1c-623f9ec3c296)
+![image](https://github.com/dfaker/DiscordVideoDumper/assets/35278260/2af8fe7e-129e-423b-9a7f-119f8ffa0557)
 
 **Download a windows release: https://github.com/dfaker/DiscordVideoDumper/releases**
 
@@ -30,3 +30,4 @@ Will enforce a minimum of 5 seconds between posts.
 - `u` next Video
 - `i` previous Video
 - `Mousewheel` to skip between clips
+- `Ctrl-A` toggle auto-posting
