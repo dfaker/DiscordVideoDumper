@@ -1,6 +1,7 @@
 import os
 import pyautogui
 
+
 scriptPath = os.path.dirname(os.path.abspath(__file__))
 basescriptPath = os.path.split(scriptPath)[0]
 os.environ["PATH"] = scriptPath + os.pathsep + os.environ["PATH"]
@@ -11,9 +12,14 @@ import time
 from tkinterdnd2 import Tk as TkinterDnDTk
 from tkinterdnd2 import DND_FILES,DND_TEXT,CF_UNICODETEXT,CF_TEXT,COPY,MOVE,LINK,CF_HDROP,FileGroupDescriptor
 from tkinter import Entry,Frame,Button, Label, filedialog, Checkbutton, StringVar, IntVar, Spinbox
+from tkinter.ttk import Progressbar, Style
+from tkinter.messagebox import askyesno
+
 from threading import Timer 
 import json
 import time
+
+
 
 class EntryWithPlaceholder(Entry):
     def __init__(self, master=None, placeholder="PLACEHOLDER", color='grey'):
@@ -44,8 +50,30 @@ class EntryWithPlaceholder(Entry):
 
 vfiles = []
 t = None
+dt = None
+sendqueued = False
 
 root = TkinterDnDTk()
+s = Style(root)
+s.theme_use('clam')
+
+
+sent = set()
+filtersent = IntVar(root)
+
+s.configure("pc0.Horizontal.TProgressbar",  background='#fa0830')
+s.configure("pc1.Horizontal.TProgressbar",  background='#fe3e0f')
+s.configure("pc2.Horizontal.TProgressbar",  background='#fc5e00')
+s.configure("pc3.Horizontal.TProgressbar",  background='#f57a00')
+s.configure("pc4.Horizontal.TProgressbar",  background='#e99400')
+s.configure("pc5.Horizontal.TProgressbar",  background='#d8ad00')
+s.configure("pc6.Horizontal.TProgressbar",  background='#c1c300')
+s.configure("pc7.Horizontal.TProgressbar",  background='#a2d900')
+s.configure("pc8.Horizontal.TProgressbar",  background='#78ec00')
+s.configure("pc9.Horizontal.TProgressbar",  background='#12ff00')
+s.configure("pc10.Horizontal.TProgressbar",  background='#12ff00')
+
+
 
 scanpath = os.path.abspath('.')
 
@@ -107,8 +135,7 @@ root.rowconfigure(2, weight=0)
 root.rowconfigure(3, weight=0)
 root.rowconfigure(4, weight=1)
 
-
-root.geometry("800x600")
+root.geometry("900x600")
 
 buttonscanPath = Button(root,text=f'Scan Path = \'{scanpath}\'')
 
@@ -131,6 +158,17 @@ def setScanPath():
         if os.path.exists(folder_selected):
             scanpath= folder_selected
             buttonscanPath.configure(text=f'Scan Path = \'{scanpath}\'')
+
+currentDuration = 0
+
+def durationChange(name,value):
+    global currentDuration
+    if value is not None:
+        currentDuration = value
+
+
+player.observe_property('duration', durationChange)
+
 
 buttonscanPath.configure(command=setScanPath)
 buttonscanPath.grid(column=0,row=0,sticky='NESW')
@@ -167,25 +205,46 @@ buttonpng = Checkbutton(framefiletypes,text='png',variable=varpng)
 buttonpng.grid(column=4,row=0,sticky='NESW')
 buttonpng.select()
 
-
 frameoptions = Frame(root)
 
 delayVar = StringVar(root)
 delayVar.set('6')
 
+lastDurationVar = StringVar(root)
+lastDurationVar.set('0')
+
+padWithLastDurVar = IntVar(root)
+padWithLastDurVar.set('0')
+
 
 labelDelay = Label(frameoptions,text='Post Delay')
 labelDelay.grid(column=0,row=0,sticky='NESW')
+
+
+
 spindelay =  Spinbox(frameoptions,text='Delay:',textvariable=delayVar,from_=0.1,to=60,increment=0.1)
 spindelay.grid(column=1,row=0,sticky='NESW')
 
+checkPadDur = Checkbutton(frameoptions,text='Add delay for predicted watch duration',variable=padWithLastDurVar)
+checkPadDur.grid(column=2,row=0,sticky='NESW')
 
 
 cooldownLabel = Label(frameoptions,text='Post Cooldown 0s')
-cooldownLabel.grid(column=2,row=0,sticky='NESW')
+cooldownLabel.grid(column=3,row=0,sticky='NESW')
 
 
-frameoptions.columnconfigure(2, weight=1)
+pb = Progressbar(
+    frameoptions,
+    orient='horizontal',
+    mode='determinate',
+    length=100,
+    style='pc0.Horizontal.TProgressbar'
+)
+
+
+pb.grid(column=0,row=1,columnspan=6,sticky='NESW')
+
+frameoptions.columnconfigure(3, weight=1)
 
 
 autovar = IntVar(root)
@@ -194,16 +253,37 @@ checkAutoPost = Checkbutton(frameoptions,text='Autopost',variable=autovar)
 checkAutoPost.grid(column=5,row=0,sticky='NESW')
 
 lastautopost = None
-
+incriticalsection=False
 autotimer = None
 def autopost():
     global autotimer
     global lastautopost
+    
+    try:
+        sendfile()
+    except Exception as e:
+        print(e)
+    
+    delay = 1 
+    
+    try:
+        delay = float(delayVar.get())
 
-    sendfile()
-    autotimer = Timer(float(delayVar.get()), autopost)
+        if padWithLastDurVar.get()==1:
+            delay += float(lastDurationVar.get())
+    except Exception as e:
+        print(e)
+        delay = 1
+
+    autotimer = Timer(delay, autopost)
     autotimer.start()
+
     lastautopost= time.time()
+
+def mouseisInWindow():
+      currentMouseX, currentMouseY = pyautogui.position()
+      winx,winy,winw,winh = root.winfo_x(), root.winfo_y(), root.winfo_width(), root.winfo_height()
+      return  winx < currentMouseX < (winx+winw) and winy < currentMouseY < (winy+winh)
 
 def toggleautopost(*args):
     global autotimer
@@ -212,12 +292,29 @@ def toggleautopost(*args):
     if autotimer is not None:
         autotimer.cancel()
     if autopostOn:
-        autotimer = Timer(float(delayVar.get()), autopost)
+
+        try:
+            delay = float(delayVar.get())
+        except Exception as e:
+            delay = 0.1
+
+        if padWithLastDurVar.get()==1:
+            delay += float(lastDurationVar.get())
+
+        delay = max(delay,1.0)
+
+        autotimer = Timer(delay, autopost)
         autotimer.start()
         lastautopost = time.time()
 
 autovar.trace('w',toggleautopost)
 delayVar.trace('w',toggleautopost)
+
+def togglelastPadd(*args):
+    lastDurationVar.set(0)
+
+
+padWithLastDurVar.trace('w',togglelastPadd)
 
 
 frameoptions.grid(column=0,row=2,columnspan=4,sticky='NESW')
@@ -250,27 +347,54 @@ def updatecooldown():
     global cooldowndisplaytimer
     diff=0.0
     apdiff=0.0
+    
+    maxsecs = float(delayVar.get())
+
     try:
         if lastSend is not None:
             delaysecs = float(delayVar.get())
+
+            if padWithLastDurVar.get()==1:
+                delaysecs += float(lastDurationVar.get())
+
+            maxsecs = delaysecs
+
             diff = delaysecs-abs(lastSend-time.time())
             diff = max(0,diff)
         if autovar.get()==1 and lastautopost is not None:
             delaysecs = float(delayVar.get())
+
+            if padWithLastDurVar.get()==1:
+                delaysecs += float(lastDurationVar.get())
+
+            maxsecs = delaysecs
             apdiff = delaysecs-abs(lastautopost-time.time())
             apdiff = max(0,apdiff)
     except:
         diff=0.0
         apdiff=0.0
     diff = max(diff,apdiff)
+
+    maxsecs = max(1.0,maxsecs)
+
+    lastdur = lastDurationVar.get()
+
+    pb['value']= 100*(1-(diff/maxsecs))
     try:
-        cooldownLabel.configure(text=f'Post Cooldown {diff:.2f}s')
-        if 2 > diff > 0:
-            cooldownLabel.configure(background='orange',foreground='white')
-        elif diff > 0:
-            cooldownLabel.configure(background='red',foreground='white')
+
+        if mouseisInWindow() and not incriticalsection:
+            cooldownLabel.configure(text=f'Mouse inside window! Move mouse pointer to file drop target location.')
+            cooldownLabel.configure(foreground='red')
+        elif sendqueued:
+            cooldownLabel.configure(text=f'Send Queued {diff:.2f}s (+{lastdur} {maxsecs}s)')
+            cooldownLabel.configure(foreground='black')
         else:
-            cooldownLabel.configure(background='green',foreground='white')
+            cooldownLabel.configure(text=f'Post Cooldown {diff:.2f}s (+{lastdur} {maxsecs}s)')
+            cooldownLabel.configure(foreground='black')
+
+        cnum = int(int(100*(1-(diff/maxsecs)))/10)
+        pb.configure(style=f'pc{cnum}.Horizontal.TProgressbar')
+
     except Exception as e:
         print(e)
 
@@ -316,7 +440,7 @@ def nextvid(e):
 
   searchset = set([x for x in fil.upper().split()])
 
-  files = [x for x in vfiles if all(k in x.upper() for k in searchset) and (any(ft in x.upper() for ft in filetypes) or len(filetypes)==0)]
+  files = [x for x in vfiles if x not in sent and all(k in x.upper() for k in searchset) and (any(ft in x.upper() for ft in filetypes) or len(filetypes)==0)]
   if len(files) == 0:
     player.stop()
     root.title('0/0 NO MATCHES')
@@ -369,13 +493,22 @@ def delvid(e):
     vfiles.remove(lastFile)
 
 def toggleMute(e):
+  print(player.mute)
   player.mute = not player.mute
 
-
 def sendfile():
+
+    if mouseisInWindow():
+        return
+
     try:
       print('send')
       global lastSend
+      global sendqueued
+      global incriticalsection
+
+      if currentDuration > 0:
+        lastDurationVar.set( round(currentDuration+1,2) )
 
       root.attributes('-topmost', 1)
       root.attributes('-topmost', 0)
@@ -386,12 +519,14 @@ def sendfile():
 
       winx += winw//2
       winy += winh//2
-
+      incriticalsection=True
       pyautogui.moveTo(winx, winy, 0.2)
+
       pyautogui.keyDown('shift')
       pyautogui.mouseDown()
       pyautogui.moveTo(currentMouseX, currentMouseY, 0.4)
       pyautogui.mouseUp()
+      sendqueued=False
       pyautogui.keyUp('shift')
       lastSend=time.time()
 
@@ -403,13 +538,16 @@ def sendfile():
       frame.focus()
       frame.focus_force()
       pyautogui.moveTo(currentMouseX, currentMouseY, 0.1)
+      incriticalsection=False
     except Exception as e:
         print(e)
 
-dt = None
+
 
 def queuesendfile(e):
   global dt
+  global sendqueued
+
   timeout = 0.1
 
   try:
@@ -425,12 +563,19 @@ def queuesendfile(e):
       pass
 
   delaysecs = float(delayVar.get())
+
+  if padWithLastDurVar.get()==1:
+    delaysecs += float(lastDurationVar.get())
+
   max(delaysecs,0.1)
 
   if lastSend is not None:
     diff = abs(lastSend-time.time())
     if diff<delaysecs:
       timeout=delaysecs-diff
+
+  if timeout > 0.1:
+    sendqueued = True
 
   dt = Timer(timeout, sendfile)
   dt.start()
@@ -480,6 +625,9 @@ frame.bind('<I>',lambda x:nextvid(-1))
 entry.bind('<Return>',nextvid)
 
 def dragInit(e):
+  if filtersent.get() == 1:
+    sent.add(currentFile)
+  
   fbin = '{{{}}}'.format(os.path.abspath(currentFile))
   nextvid(e)
   return (COPY,DND_FILES, fbin)
