@@ -1,7 +1,7 @@
 # DiscordVideoDumper
-Guided selection and automated "drag and drop" posting of discord videos - quick and dirty tool for posters.
+Guided selection and automated "drag and drop" posting of discord videos - quick and dirty tool finding those memes and posting in 0 seconds flat.
 
-![image](https://github.com/dfaker/DiscordVideoDumper/assets/35278260/2af8fe7e-129e-423b-9a7f-119f8ffa0557)
+![image](https://github.com/dfaker/DiscordVideoDumper/assets/35278260/80f5dc77-2182-4094-8367-81edbca97b25)
 
 **Download a windows release: https://github.com/dfaker/DiscordVideoDumper/releases**
 
